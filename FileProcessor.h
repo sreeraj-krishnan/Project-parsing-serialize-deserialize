@@ -28,7 +28,7 @@ typedef deque < Queue* > QueuePerSymbol;
 //typedef deque<NewRecord*> Deque;
 typedef map < string , Queue* > QueueMap;
 
-
+typedef map < string, ifstream* > IfstreamMap;
 
 class FileProcessor
 {
@@ -66,25 +66,24 @@ class FileProcessor
 	static QueuePerSymbol queue_per_sym;
 	static QueueMap queue_map;
 	static char* maxblock;
-	//static MemBlock memblock;
+	static IfstreamMap fmap;
+	
 	
 	static int FLUSH_LIMIT;
 	
 	static void AddDataToFile(const string& _symbol, const char& _record, const char* _data, const unsigned int& _data_length );
 	static void WriteToFile(const string& _sym);
 	static void FlushAllFiles();
-	static void fetchrecord( const string _file );        // from file
-	static bool fetch_records(const string _sym); // from file multiple records
-	//static Queue* fetch_records( char* read_data , int len ); // from memory
+	static bool fetch_records( const string sym );        // from symbol file
 	static void fetch_records( int len, char* read_data, const string& _sym ); // from memory per sym
-	static void fetch_records_for_queue(Queue* current_queue);
 	static void fetch_more_records();
+	static void flushOpenFiles();
 	
 	static void write_csv_records(vector< NewRecord* >& final_list,ofstream& out);
 	static void order_records(ofstream& out);
 	
 	static unsigned long beg,end;
-
+		
 };
 
 struct FileProcessor::Data

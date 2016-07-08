@@ -20,11 +20,12 @@ SymbolFileList FileProcessor::symlist;
 SaveWriteBlocks FileProcessor::save_write_blocks;
 QueuePerSymbol FileProcessor::queue_per_sym;
 QueueMap FileProcessor::queue_map;
+IfstreamMap FileProcessor::fmap;
 
 unsigned long FileProcessor::beg, FileProcessor::end;
-//MemBlock FileProcessor::memblock; 
-static unsigned int maxblocksize(0); // = FileProcessor::FLUSH_LIMIT * (QuoteNewRecord::Fields::record_length+1) ;
-char* FileProcessor::maxblock(0); // = new char [ maxblocksize ];
+
+static unsigned int maxblocksize(0); 
+char* FileProcessor::maxblock(0); 
 
 int FileProcessor::FLUSH_LIMIT = 64000;
 
@@ -65,11 +66,23 @@ void FileProcessor::flush_data_queue()
 	deque<FileProcessor::Data*>::iterator itr = chunks.begin();
 	for( int i(0) ; itr != chunks.end(); itr++ )
 	{
-			delete (*itr);
+		delete (*itr);
 	}
 	chunks.clear();
 	m_records = 0;
 	total_data = 0;
+	
+}
+
+void FileProcessor::flushOpenFiles()
+{
+	IfstreamMap::iterator itr = FileProcessor::fmap.begin();
+	for( ; itr != FileProcessor::fmap.end() ; itr++ )
+	{
+		ifstream* f = itr->second;
+		f->close();
+		delete f;
+	}
 	
 }
 
@@ -141,9 +154,7 @@ void FileProcessor::WriteToFile(const string& _sym)
 	}
 	WriteChunks* write_blocks = FileProcessor::save_write_blocks[ _sym ];
 	
-	//cout << "write blocks for " << _sym << " : " << write_blocks->size() << "\n";
-	
-	// copy all records to memory and write at one shot
+	// copy all records in block to memory and write at one shot
 	
 	deque<FileProcessor::Data*>& chunks = file->get_chunks();
 	
@@ -213,7 +224,7 @@ void FileProcessor::FlushAllFiles()
 	
 	FileProcessor::filemap.erase( FileProcessor::filemap.begin(), FileProcessor::filemap.end() );
 	cout << "Serialization complete, time taken : " << (clock() - FileProcessor::beg)/double(CLOCKS_PER_SEC) << " seconds.\n";
-	//cout << "FLUSHED ALL FILES \n";
+
 }
 
 void FileProcessor::set_total_data(const unsigned int total)
@@ -228,20 +239,20 @@ void FileProcessor::set_total_records(const int records)
 
 void FileProcessor::deserialize()
 {
+		unsigned long c_beg = clock();
 		SymbolFileList::iterator itr = FileProcessor::symlist.begin();
 		
 		for( ; itr != FileProcessor::symlist.end(); itr++ )
 		{
 			FileProcessor::fetch_records( *itr );
-			
 		}
-		unsigned long c_beg = clock();
 		cout << "Write original CSV record\n";
 		ofstream out("output.csv", ios::out );
 		FileProcessor::order_records( out );
 		out.close();
 		cout << "Write original CSV record complete, time taken : " << (clock()-c_beg)/double(CLOCKS_PER_SEC) << " seconds.\n";
 		delete[] FileProcessor::maxblock;
+		flushOpenFiles();
 }
 
 void FileProcessor::write_csv_records(vector< NewRecord* >& final_list,ofstream& out)
@@ -269,7 +280,6 @@ void PrintQueueFront()
 				cout << "sequence : " << q->front()->get_seq_id() << "\n";
 				cout << "type : " << q->front()->get_type() <<"\n"; 
 			}
-			
 		}
 		else
 		{
@@ -283,6 +293,8 @@ void FileProcessor::order_records(ofstream& out)
 	QueuePerSymbol::iterator itr;
 	unsigned long next_record=1;
 	vector< NewRecord* > csv_list;
+	csv_list.reserve( FileProcessor::FLUSH_LIMIT );
+	
 	for( QueueMap::iterator mitr = FileProcessor::queue_map.begin(); mitr != FileProcessor::queue_map.end(); mitr++ )
 	{
 		FileProcessor::queue_per_sym.push_back( mitr->second );
@@ -335,8 +347,6 @@ void FileProcessor::order_records(ofstream& out)
 			if( FileProcessor::queue_per_sym.size() )
 			{
 				continue;
-				cout << "DESERIALIZATION ERROR\n";
-				//PrintQueueFront();
 			}
 			
 			break;
@@ -351,9 +361,9 @@ void FileProcessor::fetch_more_records()
 	for( QueueMap::iterator mitr = FileProcessor::queue_map.begin(); mitr != FileProcessor::queue_map.end();  )
 	{
 		Queue* q = mitr->second;
-		if( q && q->size() == 0)
+		if( q->size() == 0)
 		{
-			if( !FileProcessor::fetch_records( mitr->first) )
+			if( !FileProcessor::fetch_records( mitr->first ) )
 			{
 				mitr = FileProcessor::queue_map.erase(mitr);
 				continue;
@@ -363,7 +373,7 @@ void FileProcessor::fetch_more_records()
 	}
 }
 
-
+#if 0
 void FileProcessor::fetch_records_for_queue(Queue* current_queue)
 {
 	
@@ -397,6 +407,7 @@ void FileProcessor::fetch_records_for_queue(Queue* current_queue)
 		FileProcessor::fetch_records( sym );
 	}
 }
+#endif
 
 bool FileProcessor::fetch_records(const string _sym)
 {
@@ -409,7 +420,6 @@ bool FileProcessor::fetch_records(const string _sym)
 			FileProcessor::save_write_blocks.erase( _sym );
 			return false;
 		}
-		//cout << _sym << " : read block size : " << write_blocks->size() << "\n";
 		
 		const pair < int, int > fd = write_blocks->front();
 		write_blocks->pop();
@@ -418,8 +428,20 @@ bool FileProcessor::fetch_records(const string _sym)
 			delete write_blocks;
 			FileProcessor::save_write_blocks.erase( _sym );
 		}
-		ifstream in(_sym +  ".binary", ios::in|ios::binary );
-		in.seekg(fd.first,ios::beg);
+		if( fmap.count(_sym ) == 0 )
+		{
+			ifstream* in = new ifstream(_sym +  ".binary", ios::in|ios::binary );
+			if( in->is_open() )
+			{
+				FileProcessor::fmap[ _sym ] = in;
+			}
+			else
+			{
+				cout << "cannot open " << _sym << ".binary file\n";
+				return false;
+			}
+		}
+		ifstream& in = *FileProcessor::fmap[ _sym ];
 		char *read_data(0);
 		if( fd.second <= maxblocksize )
 		{
@@ -430,17 +452,9 @@ bool FileProcessor::fetch_records(const string _sym)
 		if (! in.eof() )
 		{
 			in.read(read_data, fd.second);
-		
-			if( in ){}
-			else
-			{
-				cout << "read only " << in.gcount() << "\n";
-			}
-
 			FileProcessor::fetch_records( fd.second, read_data, _sym );
 		}
-		in.close();
-		//delete[] read_data;
+		
 		return true;
 	}
 	else
@@ -450,9 +464,6 @@ bool FileProcessor::fetch_records(const string _sym)
 	
 	return false;
 }
-
-
-
 
 void FileProcessor::fetch_records( int len, char* read_data, const string& _sym )
 {
@@ -467,7 +478,6 @@ void FileProcessor::fetch_records( int len, char* read_data, const string& _sym 
 	while( len > 0 )
 	{
 		r = *read_data;
-		//cout << "RECORD : " << r << "\n";
 		unsigned int record_len;
 		--len;
 		
@@ -478,7 +488,7 @@ void FileProcessor::fetch_records( int len, char* read_data, const string& _sym 
 		}
 		else
 		{
-			cout << "len : " << len << "\n";
+			cout << "Invalid record \n";
 			break;
 		}
 	
@@ -510,42 +520,3 @@ void FileProcessor::fetch_records( int len, char* read_data, const string& _sym 
 	
 }
 
-void FileProcessor::fetchrecord( const string _file )
-{
-	ifstream in(_file + ".binary", ios::binary );
-	char r;
-
-	while( !in.eof() )
-	{
-		in.read(&r, sizeof(char));
-		//cout << r<< " ";
-	
-		unsigned int record_len = FileProcessor::recordlengthmap[ r ];
-	
-		if( in.eof() )
-		{
-			break;
-		}
-		char *data = new char[record_len];
-		in.read( data, record_len);
-	
-		if( r == 'Q' )
-		{
-			QuoteNewRecord::deserialize(data, record_len);
-		}
-		else if( r == 'T' )
-		{
-			TradeNewRecord::deserialize(data, record_len);
-		}
-		else if( r == 'S')
-		{
-			SignalNewRecord::deserialize( data, record_len);
-		}
-		else
-		{
-			cout << "Invalid record in deserialize\n";
-		}
-		delete data;
-	}
-	in.close();
-}
