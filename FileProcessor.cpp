@@ -26,7 +26,7 @@ unsigned long FileProcessor::beg, FileProcessor::end;
 static unsigned int maxblocksize(0); // = FileProcessor::FLUSH_LIMIT * (QuoteNewRecord::Fields::record_length+1) ;
 char* FileProcessor::maxblock(0); // = new char [ maxblocksize ];
 
-int FileProcessor::FLUSH_LIMIT = 1024;
+int FileProcessor::FLUSH_LIMIT = 64000;
 
 
 FileProcessor::Data::Data(const char& _record, const unsigned int& _len, const char* _data):

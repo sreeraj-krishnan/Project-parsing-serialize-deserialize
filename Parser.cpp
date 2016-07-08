@@ -12,7 +12,7 @@ using namespace std;
 
 const string Parser::ORIG_DELIM(",");
 const int MAX_TOKENS = 8;
-int Parser::FLUSH_LIMIT = 8192;
+int Parser::FLUSH_LIMIT = 16000;
 
 
 Parser::Parser(const string _filename): m_filename(_filename )
