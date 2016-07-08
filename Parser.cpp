@@ -1,6 +1,5 @@
 #include "Parser.h"
-#include "Record.h"
-
+#include "NewRecord.h"
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -13,13 +12,13 @@ using namespace std;
 
 const string Parser::ORIG_DELIM(",");
 const int MAX_TOKENS = 8;
+int Parser::FLUSH_LIMIT = 8192;
+
 
 Parser::Parser(const string _filename): m_filename(_filename )
 {
-    
+    start = clock();
 }
-
-
 
 
 const vector<string> Parser::get_tokens_by_delim(const string& input, const string& delim)
@@ -49,70 +48,62 @@ const vector<string> Parser::get_tokens_by_delim(const string& input, const stri
     {
         tokens.push_back(tokn);
     }
-  // if( tokens.size() == 3 ) cout << "yes size 3 \n";
     return tokens;
 }
 
 void Parser::parse_records(const vector<string>& _lines, unsigned long& sequence)
 {
     vector<string>::const_iterator itr = _lines.begin();
-    for( ; itr != _lines.end(); ++itr )
+	
+    for( static unsigned long rec_count=1; itr != _lines.end(); ++itr )
     {
-        parse_record( *itr ,sequence );
-        sequence++;
+        parse_record( *itr ,rec_count );
+        rec_count++;
     }
     
 }
 
 void Parser::parse_record(const string& line, const unsigned long& sequence)
 {
-    
     const vector<string> tokens = get_tokens_by_delim( line, ORIG_DELIM);
-    std::locale loc;
-    // identify record type
-    if( tokens.size() == 6 )
-    {
-        Record *quote_record = new QuoteRecord( tokens, sequence);
-    }
-    else if( tokens.size() == 3 )
-    {
-        Record *trade_record = new TradeRecord(tokens, sequence);
-    }
-    else if ( tokens.size() == 4 )
-    {
-        string item4 = tokens[3];
-        if ( std::isalpha(item4[0],loc) )
-        {
-            Record *trade_record = new TradeRecord(tokens, sequence);
-        }
-        else
-        {
-            Record *signal_Record = new SignalRecord(tokens, sequence);
-        }
-        
-    }
+	NewRecord::CreateRecords( tokens, sequence  );
 }
 
 void Parser::parse_file()
 {
    ifstream file( m_filename );
    string line;        
-   vector < string > lines;
-   lines.reserve(1024);
+   vector < string > lines; // = new vector<string>(FLUSH_LIMIT);
+   lines.reserve(Parser::FLUSH_LIMIT);     
    unsigned long linecount(0);
    
    while( !file.eof() )
    {
-       getline(file,line);
+	   getline(file,line);
+	   if( line.size() < 5 )
+	   {
+		   //cout << "lines size < 20 \n";
+		   continue;
+	   }
        //cout << line.size() << " ";       
        linecount++;
        lines.push_back(line);
-       if( linecount % 1024 == 0 )
+       if( linecount % Parser::FLUSH_LIMIT == 0 )
        {
+		   //cout << "parse records\n";
            parse_records(lines, linecount);
            lines.clear();
+		   NewRecord::dispatchForSerialization();
        }
    }
-   cout << "lines : " << linecount << "\n";
+   
+   //cout << "lines read : " << linecount << "\n";
+   parse_records(lines, linecount);
+   NewRecord::dispatchForSerialization();
+   
    file.close();
+   
+   unsigned long end = clock();
+   
+   cout << "Parsing complete, time taken : " << (end-start)/double(CLOCKS_PER_SEC) << " seconds.\n";
 }

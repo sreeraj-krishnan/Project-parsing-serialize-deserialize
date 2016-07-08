@@ -2,7 +2,7 @@
 #define __QUOTE_NEW_RECORD__H
 
 #include "NewRecord.h"
-
+#include<fstream>
 
 class QuoteNewRecord : public NewRecord
 {
@@ -17,7 +17,13 @@ class QuoteNewRecord : public NewRecord
         int bsize;
         int asize;
         Fields();
-		Fields(ulong& _seq, string& d, string& sy, double& bid, double& ask, int& bsize, int&asize);
+		Fields(const ulong _seq, string d, string sy, double bid, double ask, int bsize, int asize);
+		
+		static const unsigned short date_len;
+		static const unsigned short symbol_len;
+		static const unsigned short record_length;
+		
+		friend std::ostream& operator<<(std::ostream& out, const Fields& f);
     };
 
     
@@ -27,7 +33,14 @@ class QuoteNewRecord : public NewRecord
     
     QuoteNewRecord(const QuoteNewRecord::Fields& _f);
    
-	void serialize(std::ostream& _out) const;
+	void serialize() const;
+	//unsigned long get_seq_id();
+	void print(ofstream& out) const;
+	
+	static QuoteNewRecord* deserialize(char* data, const unsigned int len);
+	
+	friend std::ostream& operator<<(std::ostream& out, const QuoteNewRecord& f);
+	
 };
 
 #endif

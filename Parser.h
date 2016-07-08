@@ -9,7 +9,8 @@ using namespace std;
 class Parser
 {
     string m_filename;
-    enum ParserType { CSV = 0 };
+    unsigned long start;
+	
     public:
         Parser( const string _filename );
         
@@ -19,6 +20,7 @@ class Parser
         const vector<string> get_tokens_by_delim(const string& input, const string& delim);
         
     static const string ORIG_DELIM;
+	static int FLUSH_LIMIT;
 };
 
 #endif

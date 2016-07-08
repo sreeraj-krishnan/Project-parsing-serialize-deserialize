@@ -16,7 +16,13 @@ class TradeNewRecord : public NewRecord
         char condition;
         
         Fields();
-        Fields(unsigned long& _seq, string& d, string& sy, double& _price, char& _condition );
+        Fields(const unsigned long _seq, string d, string sy, double _price, char _condition );
+		
+		static const unsigned short date_len;
+		static const unsigned short symbol_len;
+		static const unsigned short record_length;
+		
+		friend std::ostream& operator<<(std::ostream& out, const Fields& f);
     };
         
 
@@ -25,7 +31,12 @@ class TradeNewRecord : public NewRecord
 	
     TradeNewRecord(const TradeNewRecord::Fields& _f);
 
-	void serialize(std::ostream& _out) const;
+	void serialize() const;
+	//unsigned long get_seq_id();
+	void print(ofstream& out) const;
+	
+	static TradeNewRecord* deserialize(char* data, const unsigned int len);
+	friend std::ostream& operator<<(std::ostream& out, const TradeNewRecord& f);
 
 };
 

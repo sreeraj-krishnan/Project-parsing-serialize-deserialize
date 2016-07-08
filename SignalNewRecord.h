@@ -16,7 +16,13 @@ class SignalNewRecord : public NewRecord
         int code;
         
         Fields();
-        Fields(ulong& _seq, string& _date, string& _sym, double& _value, int& _code);
+        Fields(const ulong _seq, string _date, string _sym, double _value, int _code);
+		
+		static const unsigned short date_len;
+		static const unsigned short symbol_len;
+		static const unsigned short record_length;
+		
+		friend std::ostream& operator<<(std::ostream& out, const Fields& f);
     };
 	
 
@@ -24,7 +30,12 @@ class SignalNewRecord : public NewRecord
     
     SignalNewRecord(const SignalNewRecord::Fields& _f);
 
-    void serialize(std::ostream& _out) const;
+    void serialize() const;
+	//unsigned long get_seq_id() ;
+	void print(ofstream& out) const;
+	
+	static SignalNewRecord* deserialize(char* data, const unsigned int len);
+	friend std::ostream& operator<<(std::ostream& out, const SignalNewRecord& f);
 
 };
 
