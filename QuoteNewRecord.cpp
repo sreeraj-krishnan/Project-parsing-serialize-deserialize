@@ -44,10 +44,10 @@ unsigned long QuoteNewRecord::get_seq_id() {
 
 void QuoteNewRecord::serialize() const
 {
-	char *data = new char[Fields::record_length];
-	const char* save=data;
+	static char savedata[Fields::record_length];
+	char* data=savedata;
 	
-	memcpy(data, m_fields.datetime.c_str(), QuoteNewRecord::Fields::date_len );
+	memcpy(data, reinterpret_cast<const char*> (m_fields.datetime.c_str()), QuoteNewRecord::Fields::date_len );
 	data += QuoteNewRecord::Fields::date_len;
 	
 	memcpy(data, m_fields.symbol.c_str(), QuoteNewRecord::Fields::symbol_len );
@@ -65,11 +65,11 @@ void QuoteNewRecord::serialize() const
 	memcpy(data,reinterpret_cast<const int*>(&m_fields.asize), sizeof(int));
 	data += sizeof(int);
 	
-	memcpy(data,reinterpret_cast<const void*>(&m_fields.sequence_id), sizeof(unsigned long));
+	memcpy(data,reinterpret_cast<const unsigned long*>(&m_fields.sequence_id), sizeof(unsigned long));
 	
-	FileProcessor::AddDataToFile( m_fields.symbol, 'Q', save, QuoteNewRecord::Fields::record_length );
+	FileProcessor::AddDataToFile( m_fields.symbol, 'Q', savedata, QuoteNewRecord::Fields::record_length );
 	
-	delete save;
+	//delete save;
 	
 }
 
@@ -79,11 +79,11 @@ QuoteNewRecord* QuoteNewRecord::deserialize(char* data, const unsigned int len)
 	{
 		cout << "QuoteNewRecord length does not match";
 	}
-	char datetime[ QuoteNewRecord::Fields::date_len ];
-	char symbol[   QuoteNewRecord::Fields::symbol_len ];
-	double bid(0.0), ask(0.0);
-	int bsize(0),asize(0);
-	unsigned long sequence_id(0);
+	static char datetime[ QuoteNewRecord::Fields::date_len ];
+	static char symbol[   QuoteNewRecord::Fields::symbol_len ];
+	static double bid(0.0), ask(0.0);
+	static int bsize(0),asize(0);
+	static unsigned long sequence_id(0);
 	
 	memcpy(datetime,data, QuoteNewRecord::Fields::date_len);
 	data += QuoteNewRecord::Fields::date_len;

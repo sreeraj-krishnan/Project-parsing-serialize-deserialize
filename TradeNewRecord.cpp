@@ -35,18 +35,13 @@ TradeNewRecord::TradeNewRecord(const TradeNewRecord::Fields& _f) : NewRecord( Ne
 	m_seq_id=m_fields.sequence_id;
 }
 
-#if 0
-unsigned long TradeNewRecord::get_seq_id() {
-	return m_fields.sequence_id;
-}
-#endif
 
 void TradeNewRecord::serialize() const
 {
-	char *data = new char[Fields::record_length];
-	const char* save=data;
+	static char savedata[Fields::record_length];
+	char* data=savedata;
 	
-	memcpy(data, m_fields.datetime.c_str(), TradeNewRecord::Fields::date_len );
+	memcpy(data, reinterpret_cast<const char*>( m_fields.datetime.c_str()), TradeNewRecord::Fields::date_len );
 	data += TradeNewRecord::Fields::date_len;
 	
 	memcpy(data, m_fields.symbol.c_str(), TradeNewRecord::Fields::symbol_len );
@@ -58,11 +53,11 @@ void TradeNewRecord::serialize() const
 	memcpy(data,reinterpret_cast<const char*>(&m_fields.condition), sizeof(char));
 	data += sizeof(char);
 		
-	memcpy(data,reinterpret_cast<const void*>(&m_fields.sequence_id), sizeof(unsigned long));
+	memcpy(data,reinterpret_cast<const unsigned long*>(&m_fields.sequence_id), sizeof(unsigned long));
 	
-	FileProcessor::AddDataToFile( m_fields.symbol, 'T', save, TradeNewRecord::Fields::record_length );
+	FileProcessor::AddDataToFile( m_fields.symbol, 'T', savedata, TradeNewRecord::Fields::record_length );
 	
-	delete save;
+	//delete save;
 }
 
 
@@ -72,11 +67,11 @@ TradeNewRecord* TradeNewRecord::deserialize(char* data, const unsigned int len)
 	{
 		cout << "TradeNewRecord length does not match";
 	}
-	char datetime[ TradeNewRecord::Fields::date_len ];
-	char symbol[   TradeNewRecord::Fields::symbol_len ];
-	double price(0.0);
-	char condition;
-	unsigned long sequence_id(0);
+	static char datetime[ TradeNewRecord::Fields::date_len ];
+	static char symbol[   TradeNewRecord::Fields::symbol_len ];
+	static double price(0.0);
+	static char condition;
+	static unsigned long sequence_id(0);
 	
 	memcpy(datetime,data, TradeNewRecord::Fields::date_len);
 	data += TradeNewRecord::Fields::date_len;
