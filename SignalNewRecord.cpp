@@ -33,11 +33,16 @@ SignalNewRecord::SignalNewRecord(const SignalNewRecord::Fields& _f) : NewRecord(
 		m_seq_id=m_fields.sequence_id;
 }
 
+#if 0
+unsigned long SignalNewRecord::get_seq_id() {
+	return m_fields.sequence_id;
+}
+#endif
 
 void SignalNewRecord::serialize() const
 {
-	static char save[Fields::record_length];
-	char* data=save;
+	char *data = new char[Fields::record_length];
+	const char* save=data;
 	
 	memcpy(data, m_fields.datetime.c_str(), SignalNewRecord::Fields::date_len );
 	data += SignalNewRecord::Fields::date_len;
@@ -55,7 +60,7 @@ void SignalNewRecord::serialize() const
 	
 	FileProcessor::AddDataToFile( m_fields.symbol, 'S', save, SignalNewRecord::Fields::record_length );
 	
-	//delete save;
+	delete save;
 }
 
 
@@ -65,11 +70,11 @@ SignalNewRecord* SignalNewRecord::deserialize(char* data, const unsigned int len
 	{
 		cout << "SignalNewRecord length does not match";
 	}
-	static char datetime[ SignalNewRecord::Fields::date_len ];
-	static char symbol[   SignalNewRecord::Fields::symbol_len ];
-	static double value(0.0);
-	static int code(0);
-	static unsigned long sequence_id(0);
+	char datetime[ SignalNewRecord::Fields::date_len ];
+	char symbol[   SignalNewRecord::Fields::symbol_len ];
+	double value(0.0);
+	int code(0);
+	unsigned long sequence_id(0);
 	
 	memcpy(datetime,data, SignalNewRecord::Fields::date_len);
 	data += SignalNewRecord::Fields::date_len;
