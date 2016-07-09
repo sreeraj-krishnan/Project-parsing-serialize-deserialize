@@ -24,25 +24,20 @@ SignalNewRecord::Fields::Fields(const ulong _seq, string _date, string _sym, dou
 		value(_value),
 		code(_code)
 {
-	//datetime.reserve(24);
-	//symbol.reserve(5);
+
 }
 
 SignalNewRecord::SignalNewRecord(const SignalNewRecord::Fields& _f) : NewRecord( NewRecord::SIGNAL ), m_fields(_f)
 {
 		m_seq_id=m_fields.sequence_id;
+		//NewRecord::srec++;
 }
 
-#if 0
-unsigned long SignalNewRecord::get_seq_id() {
-	return m_fields.sequence_id;
-}
-#endif
 
 void SignalNewRecord::serialize() const
 {
-	char *data = new char[Fields::record_length];
-	const char* save=data;
+	static char save[ Fields::record_length ];
+	char* data=save;
 	
 	memcpy(data, m_fields.datetime.c_str(), SignalNewRecord::Fields::date_len );
 	data += SignalNewRecord::Fields::date_len;
@@ -56,11 +51,11 @@ void SignalNewRecord::serialize() const
 	memcpy(data,reinterpret_cast<const char*>(&m_fields.code), sizeof(int));
 	data += sizeof(int);
 		
-	memcpy(data,reinterpret_cast<const void*>(&m_fields.sequence_id), sizeof(unsigned long));
+	memcpy(data,reinterpret_cast<const unsigned long*>(&m_fields.sequence_id), sizeof(unsigned long));
 	
 	FileProcessor::AddDataToFile( m_fields.symbol, 'S', save, SignalNewRecord::Fields::record_length );
 	
-	delete save;
+	//delete save;
 }
 
 

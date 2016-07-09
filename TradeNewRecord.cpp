@@ -33,18 +33,15 @@ TradeNewRecord::Fields::Fields(const unsigned long _seq, string _d, string _sy, 
 TradeNewRecord::TradeNewRecord(const TradeNewRecord::Fields& _f) : NewRecord( NewRecord::TRADE ), m_fields(_f)
 {
 	m_seq_id=m_fields.sequence_id;
+	//NewRecord::trec++;
 }
 
-#if 0
-unsigned long TradeNewRecord::get_seq_id() {
-	return m_fields.sequence_id;
-}
-#endif
+
 
 void TradeNewRecord::serialize() const
 {
-	char *data = new char[Fields::record_length];
-	const char* save=data;
+	static char save[ Fields::record_length ];
+	char* data=save;
 	
 	memcpy(data, m_fields.datetime.c_str(), TradeNewRecord::Fields::date_len );
 	data += TradeNewRecord::Fields::date_len;
@@ -58,11 +55,11 @@ void TradeNewRecord::serialize() const
 	memcpy(data,reinterpret_cast<const char*>(&m_fields.condition), sizeof(char));
 	data += sizeof(char);
 		
-	memcpy(data,reinterpret_cast<const void*>(&m_fields.sequence_id), sizeof(unsigned long));
+	memcpy(data,reinterpret_cast<const unsigned long*>(&m_fields.sequence_id), sizeof(unsigned long));
 	
 	FileProcessor::AddDataToFile( m_fields.symbol, 'T', save, TradeNewRecord::Fields::record_length );
 	
-	delete save;
+	//delete save;
 }
 
 

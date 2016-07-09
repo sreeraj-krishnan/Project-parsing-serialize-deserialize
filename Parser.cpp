@@ -12,8 +12,8 @@ using namespace std;
 
 const string Parser::ORIG_DELIM(",");
 const int MAX_TOKENS = 8;
-int Parser::FLUSH_LIMIT = 64000;
-
+int Parser::FLUSH_LIMIT = 8192;
+unsigned int Parser::FILE_READ_BLOCK = 10 * 1024 * 1024; // 10 MB
 
 Parser::Parser(const string _filename): m_filename(_filename )
 {
@@ -69,6 +69,13 @@ void Parser::parse_record(const string& line, const unsigned long& sequence)
 	NewRecord::CreateRecords( tokens, sequence  );
 }
 
+void Parser::parse_record(const string& line )
+{
+	static unsigned long seq=1;
+    const vector<string> tokens = get_tokens_by_delim( line, ORIG_DELIM);
+	NewRecord::CreateRecords( tokens, seq++ );
+}
+
 void Parser::parse_file()
 {
    ifstream file( m_filename );
@@ -76,34 +83,48 @@ void Parser::parse_file()
    vector < string > lines; // = new vector<string>(FLUSH_LIMIT);
    lines.reserve(Parser::FLUSH_LIMIT);     
    unsigned long linecount(0);
+   char* block = new char[ FILE_READ_BLOCK + 100];
+   short index;
+   unsigned long blocklen(0);
    
    while( !file.eof() )
    {
-	   getline(file,line);
-	   if( line.size() < 5 )
+	   file.read( block, FILE_READ_BLOCK);
+	   index=0;
+	   if( file.gcount() == FILE_READ_BLOCK )
 	   {
-		   //cout << "lines size < 20 \n";
-		   continue;
+			char c;
+			while( !file.eof() )
+			{
+				file.get(c);
+				block[index++] = c;
+				if( c == '\r' || c =='\n' )
+					break;
+			}
+			blocklen = FILE_READ_BLOCK + index;
 	   }
-       //cout << line.size() << " ";       
-       linecount++;
-       lines.push_back(line);
-       if( linecount % Parser::FLUSH_LIMIT == 0 )
-       {
-		   //cout << "parse records\n";
-           parse_records(lines, linecount);
-           lines.clear();
-		   NewRecord::dispatchForSerialization();
-       }
-   }
-   
-   //cout << "lines read : " << linecount << "\n";
-   parse_records(lines, linecount);
+	   else
+	   {
+		   blocklen = file.gcount();
+	   }
+	   int j;
+	   for( int i(0); i < blocklen; i++)
+	   {
+		   j = i;
+		   char* linebegin = block + j;
+		   for( ; block[j] != '\n' && j < blocklen; j++ );
+		   lines.push_back( string(linebegin, j-i ) );
+		   if( linecount % Parser::FLUSH_LIMIT == 0 )
+		   {
+			   	parse_records(lines, linecount);
+				lines.clear();
+				NewRecord::dispatchForSerialization();
+		   }
+		   i = j;
+	   }
+	}
+   delete[] block;
    NewRecord::dispatchForSerialization();
-   
    file.close();
-   
-   unsigned long end = clock();
-   
-   cout << "Parsing complete, time taken : " << (end-start)/double(CLOCKS_PER_SEC) << " seconds.\n";
+   cout << "Parsing complete, time taken : " << (clock()-start)/double(CLOCKS_PER_SEC) << " seconds.\n";
 }

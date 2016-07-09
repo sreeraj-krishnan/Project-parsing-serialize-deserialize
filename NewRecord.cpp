@@ -67,7 +67,6 @@ void NewRecord::CreateRecords(const vector<string>& tokens , const unsigned long
 
 void NewRecord::registerForSerialization( NewRecord* record )
 {
-	
 	NewRecord::serial_list.push_back( record );
 }
 
