@@ -267,7 +267,7 @@ void FileProcessor::write_csv_records(vector< NewRecord* >& final_list,ofstream&
 	}
 	int len = ss.tellg();
 	out << ss.str();
-	ss.clear();
+	ss = stringstream();
 	final_list.clear();
 	
 }
