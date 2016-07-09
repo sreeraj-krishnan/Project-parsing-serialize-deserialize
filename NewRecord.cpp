@@ -61,13 +61,17 @@ void NewRecord::CreateRecords(const vector<string>& tokens , const unsigned long
   }
   catch(const std::exception& ex)
   {
-	cout << "exception caught : " << ex.what() << "\n";
+	cout << "exception caught : " << ex.what() <<  " " <<  seq <<"\n";
+#if 0
+	for( int i=0; i < tokens.size(); i++ )
+		cout << tokens[i] << " ";
+	cout << "\n";
+#endif
   }
 }
 
 void NewRecord::registerForSerialization( NewRecord* record )
 {
-	
 	NewRecord::serial_list.push_back( record );
 }
 

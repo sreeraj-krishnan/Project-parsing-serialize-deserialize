@@ -35,7 +35,6 @@ class QuoteNewRecord : public NewRecord
     QuoteNewRecord(const QuoteNewRecord::Fields& _f);
    
 	void serialize() const;
-	//unsigned long get_seq_id();
 	void print(ofstream& out) const;
 	void print(stringstream& out) const;
 	

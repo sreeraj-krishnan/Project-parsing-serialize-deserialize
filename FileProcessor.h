@@ -25,7 +25,6 @@ typedef list<string> SymbolFileList;
 typedef queue<NewRecord*> Queue;
 
 typedef deque < Queue* > QueuePerSymbol;
-//typedef deque<NewRecord*> Deque;
 typedef map < string , Queue* > QueueMap;
 
 typedef map < string, ifstream* > IfstreamMap;

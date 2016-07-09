@@ -31,7 +31,6 @@ class NewRecord
 	unsigned long get_seq_id(); 
     
     virtual void serialize() const = 0;
-    //virtual void print(ofstream& out) const = 0 ;
     virtual void print(stringstream& out) const = 0 ;
 	
     static NewRecord* deserialize();
@@ -43,6 +42,7 @@ class NewRecord
 
 	unsigned long m_seq_id;
 	bool operator<(const NewRecord* i) { m_seq_id < i->m_seq_id ; }
+	
 	
  private:
     Type m_type;

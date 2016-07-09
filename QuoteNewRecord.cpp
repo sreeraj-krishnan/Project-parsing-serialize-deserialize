@@ -25,27 +25,19 @@ QuoteNewRecord::Fields::Fields(const ulong _seq, string _d, string _sy, double _
 		bsize(_bsize),
 		asize(_asize)
 {
-	//datetime.reserve(24);
-	//symbol.reserve(5);
 }
 
 QuoteNewRecord::QuoteNewRecord(const QuoteNewRecord::Fields& _f) : NewRecord( NewRecord::QUOTE ), m_fields(_f)
 {
-		// register for serialization
-		//serialize();
+		//NewRecord::qrec++;
 		m_seq_id=m_fields.sequence_id;
 }
 
-#if 0
-unsigned long QuoteNewRecord::get_seq_id() {
-	return m_fields.sequence_id;
-}
-#endif
 
 void QuoteNewRecord::serialize() const
 {
-	char *data = new char[Fields::record_length];
-	const char* save=data;
+	static char save[ Fields::record_length ];
+	char* data=save;
 	
 	memcpy(data, m_fields.datetime.c_str(), QuoteNewRecord::Fields::date_len );
 	data += QuoteNewRecord::Fields::date_len;
@@ -65,11 +57,9 @@ void QuoteNewRecord::serialize() const
 	memcpy(data,reinterpret_cast<const int*>(&m_fields.asize), sizeof(int));
 	data += sizeof(int);
 	
-	memcpy(data,reinterpret_cast<const void*>(&m_fields.sequence_id), sizeof(unsigned long));
+	memcpy(data,reinterpret_cast<const unsigned long*>(&m_fields.sequence_id), sizeof(unsigned long));
 	
 	FileProcessor::AddDataToFile( m_fields.symbol, 'Q', save, QuoteNewRecord::Fields::record_length );
-	
-	delete save;
 	
 }
 
@@ -112,7 +102,6 @@ QuoteNewRecord* QuoteNewRecord::deserialize(char* data, const unsigned int len)
 std::stringstream& operator<<(std::stringstream& out, const QuoteNewRecord::Fields& f)
 {
 	out.precision(8);
-	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.bid << "," <<f.ask << "," << f.bsize << "," << f.asize << "\n";
 	out << f.datetime << "," << f.symbol << "," << f.bid << "," <<f.ask << "," << f.bsize << "," << f.asize<<std::endl;
 	
 	return out;
@@ -137,7 +126,6 @@ void QuoteNewRecord::print(stringstream& out) const
 std::ostream& operator<<(std::ostream& out, const QuoteNewRecord::Fields& f)
 {
 	out.precision(8);
-	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.bid << "," <<f.ask << "," << f.bsize << "," << f.asize << "\n";
 	out << f.datetime << "," << f.symbol << "," << f.bid << "," <<f.ask << "," << f.bsize << "," << f.asize<<"\n";
 	
 	return out;

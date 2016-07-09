@@ -18,9 +18,11 @@ class Parser
         void parse_records(const vector<string>& _lines,  unsigned long& sequence);
         void parse_record(const string& line, const unsigned long& _sequence);
         const vector<string> get_tokens_by_delim(const string& input, const string& delim);
-        
+        void parse_record(const string& line );
+		
     static const string ORIG_DELIM;
 	static int FLUSH_LIMIT;
+	static unsigned int FILE_READ_BLOCK;
 };
 
 #endif
