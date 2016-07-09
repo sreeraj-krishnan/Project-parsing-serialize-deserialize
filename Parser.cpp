@@ -12,8 +12,8 @@ using namespace std;
 
 const string Parser::ORIG_DELIM(",");
 const int MAX_TOKENS = 8;
-int Parser::FLUSH_LIMIT = 64000;
-unsigned int Parser::FILE_READ_BLOCK = 10 * 1024 * 1024; // 10 MB
+int Parser::FLUSH_LIMIT = 128000;
+unsigned int Parser::FILE_READ_BLOCK = 16 * 1024 * 1024; // 16 MB
 
 Parser::Parser(const string _filename): m_filename(_filename )
 {
@@ -80,26 +80,28 @@ void Parser::parse_file()
 {
    ifstream file( m_filename );
    string line;        
-   vector < string > lines; // = new vector<string>(FLUSH_LIMIT);
+   vector < string > lines; 
    lines.reserve(Parser::FLUSH_LIMIT);     
    unsigned long linecount(0);
-   char* block = new char[ FILE_READ_BLOCK + 100];
+   char* block = new char[ FILE_READ_BLOCK + 100 ];
    short index;
    unsigned long blocklen(0);
+   char* linebegin(0);
    
    while( !file.eof() )
    {
 	   file.read( block, FILE_READ_BLOCK);
 	   index=0;
-	   if( file.gcount() == FILE_READ_BLOCK )
+	   if( file )
 	   {
 			char c;
 			while( !file.eof() )
 			{
 				file.get(c);
-				block[index++] = c;
-				if( c == '\r' || c =='\n' )
+				block[FILE_READ_BLOCK + index++] = c;
+				if( c =='\n')
 					break;
+				
 			}
 			blocklen = FILE_READ_BLOCK + index;
 	   }
@@ -111,9 +113,12 @@ void Parser::parse_file()
 	   for( int i(0); i < blocklen; i++)
 	   {
 		   j = i;
-		   char* linebegin = block + j;
+		   linebegin = block + j;
+		   
 		   for( ; block[j] != '\n' && j < blocklen; j++ );
+		   
 		   lines.push_back( string(linebegin, j-i ) );
+		   
 		   if( linecount % Parser::FLUSH_LIMIT == 0 )
 		   {
 			   	parse_records(lines, linecount);

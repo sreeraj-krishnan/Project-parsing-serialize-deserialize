@@ -28,7 +28,7 @@ unsigned long FileProcessor::beg, FileProcessor::end;
 static unsigned int maxblocksize(0); 
 char* FileProcessor::maxblock(0); 
 
-int FileProcessor::FLUSH_LIMIT = 64000;
+int FileProcessor::FLUSH_LIMIT = 128000;
 
 
 FileProcessor::Data::Data(const char& _record, const unsigned int& _len, const char* _data):
