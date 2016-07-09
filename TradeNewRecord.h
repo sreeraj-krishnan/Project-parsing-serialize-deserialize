@@ -33,7 +33,6 @@ class TradeNewRecord : public NewRecord
     TradeNewRecord(const TradeNewRecord::Fields& _f);
 
 	void serialize() const;
-	//unsigned long get_seq_id();
 	void print(ofstream& out) const;
 	void print(stringstream& out) const;
 	

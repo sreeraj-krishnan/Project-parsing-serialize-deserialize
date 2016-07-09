@@ -30,7 +30,6 @@ SignalNewRecord::Fields::Fields(const ulong _seq, string _date, string _sym, dou
 SignalNewRecord::SignalNewRecord(const SignalNewRecord::Fields& _f) : NewRecord( NewRecord::SIGNAL ), m_fields(_f)
 {
 		m_seq_id=m_fields.sequence_id;
-		//NewRecord::srec++;
 }
 
 
@@ -54,8 +53,6 @@ void SignalNewRecord::serialize() const
 	memcpy(data,reinterpret_cast<const unsigned long*>(&m_fields.sequence_id), sizeof(unsigned long));
 	
 	FileProcessor::AddDataToFile( m_fields.symbol, 'S', save, SignalNewRecord::Fields::record_length );
-	
-	//delete save;
 }
 
 
@@ -93,7 +90,6 @@ SignalNewRecord* SignalNewRecord::deserialize(char* data, const unsigned int len
 std::stringstream& operator<<(std::stringstream& out, const SignalNewRecord::Fields& f)
 {
 	out.precision(8);
-	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.value << "," <<f.code<<"\n";
 	out << f.datetime << "," << f.symbol << "," << f.value << "," <<f.code << "\n";
 	
 	return out;
@@ -108,7 +104,6 @@ std::stringstream& operator<<(std::stringstream& out, const SignalNewRecord& f)
 std::ostream& operator<<(std::ostream& out, const SignalNewRecord::Fields& f)
 {
 	out.precision(8);
-	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.value << "," <<f.code<<"\n";
 	out << f.datetime << "," << f.symbol << "," << f.value << "," <<f.code << std::endl;
 	
 	return out;

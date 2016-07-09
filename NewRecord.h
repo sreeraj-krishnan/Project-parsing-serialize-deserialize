@@ -43,9 +43,6 @@ class NewRecord
 	unsigned long m_seq_id;
 	bool operator<(const NewRecord* i) { m_seq_id < i->m_seq_id ; }
 	
-	//static int qrec;
-	//static int srec;
-	//static int trec;
 	
  private:
     Type m_type;

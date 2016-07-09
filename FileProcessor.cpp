@@ -378,41 +378,6 @@ void FileProcessor::fetch_more_records()
 	}
 }
 
-#if 0
-void FileProcessor::fetch_records_for_queue(Queue* current_queue)
-{
-	
-	if( current_queue )
-	{
-		NewRecord* r = current_queue->front();
-		string sym;
-		if( !r )
-		{
-			cout << "Queueu null record\n";
-			return;
-		}
-		if( r->get_type() == NewRecord::QUOTE )
-		{
-			sym = (dynamic_cast<QuoteNewRecord*>(r))->m_fields.symbol;
-		}
-		else if( r->get_type() == NewRecord::TRADE )
-		{
-			sym = (dynamic_cast<TradeNewRecord*>(r))->m_fields.symbol;
-		}
-		else if( r->get_type() == NewRecord::SIGNAL )
-		{
-			sym = (dynamic_cast<SignalNewRecord*>(r))->m_fields.symbol;
-		}
-		else
-		{
-			cout << "INVALID record\n";
-			return;
-		}
-	
-		FileProcessor::fetch_records( sym );
-	}
-}
-#endif
 
 bool FileProcessor::fetch_records(const string _sym)
 {
@@ -451,7 +416,6 @@ bool FileProcessor::fetch_records(const string _sym)
 		if( fd.second <= maxblocksize )
 		{
 			read_data = FileProcessor::maxblock;
-			//memset(read_data, 0, fd.second );
 		}
 		
 		if (! in.eof() )

@@ -26,14 +26,11 @@ TradeNewRecord::Fields::Fields(const unsigned long _seq, string _d, string _sy, 
 		price(_price),
 		condition(_condition)
 {
-	//datetime.reserve(24);
-	//symbol.reserve(5);
 }
 
 TradeNewRecord::TradeNewRecord(const TradeNewRecord::Fields& _f) : NewRecord( NewRecord::TRADE ), m_fields(_f)
 {
 	m_seq_id=m_fields.sequence_id;
-	//NewRecord::trec++;
 }
 
 
@@ -59,7 +56,6 @@ void TradeNewRecord::serialize() const
 	
 	FileProcessor::AddDataToFile( m_fields.symbol, 'T', save, TradeNewRecord::Fields::record_length );
 	
-	//delete save;
 }
 
 
@@ -68,6 +64,7 @@ TradeNewRecord* TradeNewRecord::deserialize(char* data, const unsigned int len)
 	if( Fields::record_length != len )
 	{
 		cout << "TradeNewRecord length does not match";
+		
 	}
 	char datetime[ TradeNewRecord::Fields::date_len ];
 	char symbol[   TradeNewRecord::Fields::symbol_len ];
@@ -97,7 +94,6 @@ TradeNewRecord* TradeNewRecord::deserialize(char* data, const unsigned int len)
 std::stringstream& operator<<(std::stringstream& out, const TradeNewRecord::Fields& f)
 {
 	out.precision(8);
-	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.price << ",";
 	out << f.datetime << "," << f.symbol << "," << f.price << ",";
 	if( f.condition != 0 )
 	{
@@ -116,7 +112,6 @@ std::stringstream& operator<<(std::stringstream& out, const TradeNewRecord& f)
 std::ostream& operator<<(std::ostream& out, const TradeNewRecord::Fields& f)
 {
 	out.precision(8);
-	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.price << ",";
 	out << f.datetime << "," << f.symbol << "," << f.price << ",";
 	if( f.condition != 0 )
 	{
