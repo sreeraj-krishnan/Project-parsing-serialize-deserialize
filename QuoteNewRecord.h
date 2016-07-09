@@ -24,6 +24,7 @@ class QuoteNewRecord : public NewRecord
 		static const unsigned short record_length;
 		
 		friend std::ostream& operator<<(std::ostream& out, const Fields& f);
+		friend std::stringstream& operator<<(std::stringstream& out, const Fields& f);
     };
 
     
@@ -36,9 +37,11 @@ class QuoteNewRecord : public NewRecord
 	void serialize() const;
 	//unsigned long get_seq_id();
 	void print(ofstream& out) const;
+	void print(stringstream& out) const;
 	
 	static QuoteNewRecord* deserialize(char* data, const unsigned int len);
 	
+	friend std::stringstream& operator<<(std::stringstream& out, const QuoteNewRecord& f);
 	friend std::ostream& operator<<(std::ostream& out, const QuoteNewRecord& f);
 	
 };

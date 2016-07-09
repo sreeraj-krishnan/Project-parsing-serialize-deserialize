@@ -95,11 +95,26 @@ SignalNewRecord* SignalNewRecord::deserialize(char* data, const unsigned int len
 
 }
 
-std::ostream& operator<<(std::ostream& out, const SignalNewRecord::Fields& f)
+std::stringstream& operator<<(std::stringstream& out, const SignalNewRecord::Fields& f)
 {
 	out.precision(8);
 	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.value << "," <<f.code<<"\n";
 	out << f.datetime << "," << f.symbol << "," << f.value << "," <<f.code << "\n";
+	
+	return out;
+}
+std::stringstream& operator<<(std::stringstream& out, const SignalNewRecord& f)
+{
+	out << f.m_fields;
+	return out;
+}
+
+
+std::ostream& operator<<(std::ostream& out, const SignalNewRecord::Fields& f)
+{
+	out.precision(8);
+	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.value << "," <<f.code<<"\n";
+	out << f.datetime << "," << f.symbol << "," << f.value << "," <<f.code << std::endl;
 	
 	return out;
 }
@@ -108,6 +123,12 @@ std::ostream& operator<<(std::ostream& out, const SignalNewRecord& f)
 	out << f.m_fields;
 	return out;
 }
+
+void SignalNewRecord::print(stringstream& out) const
+{
+	out << *this;
+}
+
 void SignalNewRecord::print(ofstream& out) const
 {
 	out << *this;

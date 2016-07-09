@@ -109,6 +109,30 @@ QuoteNewRecord* QuoteNewRecord::deserialize(char* data, const unsigned int len)
     			
 }
 
+std::stringstream& operator<<(std::stringstream& out, const QuoteNewRecord::Fields& f)
+{
+	out.precision(8);
+	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.bid << "," <<f.ask << "," << f.bsize << "," << f.asize << "\n";
+	out << f.datetime << "," << f.symbol << "," << f.bid << "," <<f.ask << "," << f.bsize << "," << f.asize<<std::endl;
+	
+	return out;
+}
+
+
+std::stringstream& operator<<(std::stringstream& out, const QuoteNewRecord& f)
+{
+	out << f.m_fields;
+	return out;
+}
+
+void QuoteNewRecord::print(ofstream& out) const
+{
+	out << *this;
+}
+void QuoteNewRecord::print(stringstream& out) const
+{
+	out << *this;
+}
 
 std::ostream& operator<<(std::ostream& out, const QuoteNewRecord::Fields& f)
 {
@@ -118,13 +142,10 @@ std::ostream& operator<<(std::ostream& out, const QuoteNewRecord::Fields& f)
 	
 	return out;
 }
+
+
 std::ostream& operator<<(std::ostream& out, const QuoteNewRecord& f)
 {
 	out << f.m_fields;
 	return out;
-}
-
-void QuoteNewRecord::print(ofstream& out) const
-{
-	out << *this;
 }

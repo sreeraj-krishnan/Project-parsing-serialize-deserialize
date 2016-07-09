@@ -96,7 +96,8 @@ TradeNewRecord* TradeNewRecord::deserialize(char* data, const unsigned int len)
 
 }
 
-std::ostream& operator<<(std::ostream& out, const TradeNewRecord::Fields& f)
+
+std::stringstream& operator<<(std::stringstream& out, const TradeNewRecord::Fields& f)
 {
 	out.precision(8);
 	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.price << ",";
@@ -109,10 +110,35 @@ std::ostream& operator<<(std::ostream& out, const TradeNewRecord::Fields& f)
 	
 	return out;
 }
+std::stringstream& operator<<(std::stringstream& out, const TradeNewRecord& f)
+{
+	out << f.m_fields;
+	return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const TradeNewRecord::Fields& f)
+{
+	out.precision(8);
+	//out << f.sequence_id << "," << f.datetime << "," << f.symbol << "," << f.price << ",";
+	out << f.datetime << "," << f.symbol << "," << f.price << ",";
+	if( f.condition != 0 )
+	{
+		out<<f.condition;
+	}
+	out << std::endl;
+	
+	return out;
+}
 std::ostream& operator<<(std::ostream& out, const TradeNewRecord& f)
 {
 	out << f.m_fields;
 	return out;
+}
+
+
+void TradeNewRecord::print(stringstream& out) const
+{
+	out << *this;
 }
 
 void TradeNewRecord::print(ofstream& out) const

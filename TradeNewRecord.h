@@ -2,7 +2,7 @@
 #define __TRADE_NEW_RECORD__H
 
 #include "NewRecord.h"
-
+#include<fstream>
 
 class TradeNewRecord : public NewRecord
 {
@@ -23,6 +23,7 @@ class TradeNewRecord : public NewRecord
 		static const unsigned short record_length;
 		
 		friend std::ostream& operator<<(std::ostream& out, const Fields& f);
+		friend std::stringstream& operator<<(std::stringstream& out, const Fields& f);
     };
         
 
@@ -34,8 +35,10 @@ class TradeNewRecord : public NewRecord
 	void serialize() const;
 	//unsigned long get_seq_id();
 	void print(ofstream& out) const;
+	void print(stringstream& out) const;
 	
 	static TradeNewRecord* deserialize(char* data, const unsigned int len);
+	friend std::stringstream& operator<<(std::stringstream& out, const TradeNewRecord& f);
 	friend std::ostream& operator<<(std::ostream& out, const TradeNewRecord& f);
 
 };

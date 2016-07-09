@@ -7,6 +7,7 @@
 #include<fstream>
 #include<iostream>
 #include<list>
+#include<sstream>
 
 using namespace std;
 
@@ -28,8 +29,10 @@ class NewRecord
     virtual ~NewRecord();
 
 	unsigned long get_seq_id(); 
+    
     virtual void serialize() const = 0;
-	virtual void print(ofstream& out) const = 0 ;
+    //virtual void print(ofstream& out) const = 0 ;
+    virtual void print(stringstream& out) const = 0 ;
 	
     static NewRecord* deserialize();
     static void CreateRecords(const vector<string>& tokens , const unsigned long& seq);
@@ -40,7 +43,6 @@ class NewRecord
 
 	unsigned long m_seq_id;
 	bool operator<(const NewRecord* i) { m_seq_id < i->m_seq_id ; }
-	//bool operator<( NewRecord* const i,  NewRecord* const j) { return ( i->get_seq_id() < j->get_seq_id() );}
 	
  private:
     Type m_type;

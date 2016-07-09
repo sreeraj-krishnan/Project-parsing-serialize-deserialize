@@ -8,6 +8,7 @@
 #include<string.h>
 #include<iostream>
 #include<fstream>
+#include<sstream>
 #include<string>
 #include<algorithm>
 
@@ -258,11 +259,15 @@ void FileProcessor::deserialize()
 void FileProcessor::write_csv_records(vector< NewRecord* >& final_list,ofstream& out)
 {
 	vector< NewRecord* >::iterator itr = final_list.begin();
+	static stringstream ss;
 	for( ; itr != final_list.end() ; itr++ )
 	{
-		(*itr)->print( out );
+		(*itr)->print( ss );
 		delete (*itr);
 	}
+	int len = ss.tellg();
+	out << ss.str();
+	ss.clear();
 	final_list.clear();
 	
 }

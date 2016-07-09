@@ -3,7 +3,6 @@
 
 #include "NewRecord.h"
 
-
 class SignalNewRecord : public NewRecord
 {
  public:
@@ -22,6 +21,7 @@ class SignalNewRecord : public NewRecord
 		static const unsigned short symbol_len;
 		static const unsigned short record_length;
 		
+		friend std::stringstream& operator<<(std::stringstream& out, const Fields& f);
 		friend std::ostream& operator<<(std::ostream& out, const Fields& f);
     };
 	
@@ -31,11 +31,13 @@ class SignalNewRecord : public NewRecord
     SignalNewRecord(const SignalNewRecord::Fields& _f);
 
     void serialize() const;
-	//unsigned long get_seq_id() ;
 	void print(ofstream& out) const;
+	void print(stringstream& out) const;
 	
 	static SignalNewRecord* deserialize(char* data, const unsigned int len);
 	friend std::ostream& operator<<(std::ostream& out, const SignalNewRecord& f);
+	
+	friend std::stringstream& operator<<(std::stringstream& out, const SignalNewRecord& f);
 
 };
 
