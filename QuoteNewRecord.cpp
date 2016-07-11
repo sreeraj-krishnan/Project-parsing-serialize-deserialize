@@ -69,29 +69,30 @@ QuoteNewRecord* QuoteNewRecord::deserialize(char* data, const unsigned int len)
 	{
 		cout << "QuoteNewRecord length does not match";
 	}
-	char datetime[ QuoteNewRecord::Fields::date_len ];
-	char symbol[   QuoteNewRecord::Fields::symbol_len ];
-	double bid(0.0), ask(0.0);
-	int bsize(0),asize(0);
-	unsigned long sequence_id(0);
+	static char datetime[ QuoteNewRecord::Fields::date_len ];
+	static char symbol[   QuoteNewRecord::Fields::symbol_len ];
+	static double bid(0.0), ask(0.0);
+	static int bsize(0),asize(0);
+	static unsigned long sequence_id(0);
 	
 	memcpy(datetime,data, QuoteNewRecord::Fields::date_len);
 	data += QuoteNewRecord::Fields::date_len;
 	
-	
 	memcpy(symbol,data,QuoteNewRecord::Fields::symbol_len);
-	
-	
 	data += QuoteNewRecord::Fields::symbol_len;
 	
 	memcpy(reinterpret_cast<void*>(&bid), data, sizeof(double));
 	data += sizeof(double);
+	
 	memcpy(reinterpret_cast<void*>(&ask), data, sizeof(double));
 	data += sizeof(double);
+	
 	memcpy(reinterpret_cast<void*>(&bsize), data, sizeof(int));
 	data += sizeof(int);
+	
 	memcpy(reinterpret_cast<void*>(&asize), data, sizeof(int));
 	data += sizeof(int);
+	
 	memcpy(reinterpret_cast<void*>(&sequence_id), data, sizeof(unsigned long));
 
 

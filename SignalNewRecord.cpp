@@ -62,11 +62,11 @@ SignalNewRecord* SignalNewRecord::deserialize(char* data, const unsigned int len
 	{
 		cout << "SignalNewRecord length does not match";
 	}
-	char datetime[ SignalNewRecord::Fields::date_len ];
-	char symbol[   SignalNewRecord::Fields::symbol_len ];
-	double value(0.0);
-	int code(0);
-	unsigned long sequence_id(0);
+	static char datetime[ SignalNewRecord::Fields::date_len ];
+	static char symbol[   SignalNewRecord::Fields::symbol_len ];
+	static double value(0.0);
+	static int code(0);
+	static unsigned long sequence_id(0);
 	
 	memcpy(datetime,data, SignalNewRecord::Fields::date_len);
 	data += SignalNewRecord::Fields::date_len;
