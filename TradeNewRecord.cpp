@@ -66,11 +66,11 @@ TradeNewRecord* TradeNewRecord::deserialize(char* data, const unsigned int len)
 		cout << "TradeNewRecord length does not match";
 		
 	}
-	char datetime[ TradeNewRecord::Fields::date_len ];
-	char symbol[   TradeNewRecord::Fields::symbol_len ];
-	double price(0.0);
-	char condition;
-	unsigned long sequence_id(0);
+	static char datetime[ TradeNewRecord::Fields::date_len ];
+	static char symbol[   TradeNewRecord::Fields::symbol_len ];
+	static double price(0.0);
+	static char condition;
+	static unsigned long sequence_id(0);
 	
 	memcpy(datetime,data, TradeNewRecord::Fields::date_len);
 	data += TradeNewRecord::Fields::date_len;
